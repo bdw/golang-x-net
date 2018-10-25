@@ -668,6 +668,21 @@ func TestTokenizerFromBuffer(t *testing.T) {
 	}
 }
 
+func TestOffset(t *testing.T) {
+	z := NewTokenizer(bytes.NewBufferString("<html><body> foo <br /></body></html>"))
+	offsets := []int{0, 6, 12, 17, 23, 30, 37}
+	for i := 1; i < len(offsets); i++ {
+		z.Next()
+		start, end := z.Offset()
+		if offsets[i-1] != start || offsets[i] != end {
+			t.Errorf("Offset fail: expected [%d-%d], got [%d-%d]", offsets[i-1], offsets[i], start, end)
+		}
+	}
+	if z.Next() != ErrorToken || z.Err() != io.EOF {
+		t.Error("Expected end-of-stream")
+	}
+}
+
 // zeroOneByteReader is like a strings.Reader that alternates between
 // returning 0 bytes and 1 byte at a time.
 type zeroOneByteReader struct {

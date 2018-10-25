@@ -146,6 +146,9 @@ type Tokenizer struct {
 	// buf[raw.end:] is buffered input that will yield future tokens.
 	raw span
 	buf []byte
+	// offset holds the offset from the start of the io.Reader that we
+	// have read so far
+	offset int
 	// maxBuf limits the data buffered in buf. A value of 0 means unlimited.
 	maxBuf int
 	// buf[data.start:data.end] holds the raw bytes of the current token's data:
@@ -275,6 +278,7 @@ func (z *Tokenizer) readByte() byte {
 			z.err = z.readErr
 			return 0
 		}
+		z.offset += d
 		z.buf = buf1[:d+n]
 	}
 	x := z.buf[z.raw.end]
@@ -1188,6 +1192,11 @@ func (z *Tokenizer) Token() Token {
 // A value of 0 means unlimited.
 func (z *Tokenizer) SetMaxBuf(n int) {
 	z.maxBuf = n
+}
+
+// Report the start and end offset of the current token
+func (z *Tokenizer) Offset() (int, int) {
+	return z.offset + z.raw.start, z.offset + z.raw.end
 }
 
 // NewTokenizer returns a new HTML Tokenizer for the given Reader.
