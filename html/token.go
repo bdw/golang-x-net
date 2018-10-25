@@ -1217,3 +1217,18 @@ func NewTokenizerFragment(r io.Reader, contextTag string) *Tokenizer {
 	}
 	return z
 }
+
+type emptyReader struct{}
+
+func (e emptyReader) Read(out []byte) (n int, err error) {
+	return 0, io.EOF
+}
+
+// NewTokenizerFromBuffer returns a new HTML tokenizer for the given
+// buffer. This can avoid copying the buffer.
+func NewTokenizerFromBuffer(b []byte) *Tokenizer {
+	return &Tokenizer{
+		r:   emptyReader{},
+		buf: b,
+	}
+}

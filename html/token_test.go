@@ -646,6 +646,28 @@ func TestReaderEdgeCases(t *testing.T) {
 	}
 }
 
+func TestTokenizerFromBuffer(t *testing.T) {
+	z := NewTokenizerFromBuffer([]byte("<html> foo<br /> </html>"))
+	if z.Next() != StartTagToken || bytes.Compare([]byte("<html>"), z.Raw()) != 0 {
+		t.Error("Expected start token")
+	}
+	if z.Next() != TextToken || bytes.Compare([]byte(" foo"), z.Raw()) != 0 {
+		t.Error("Expected text token")
+	}
+	if z.Next() != SelfClosingTagToken || bytes.Compare([]byte("<br />"), z.Raw()) != 0 {
+		t.Error("Expected self closing token")
+	}
+	if z.Next() != TextToken || bytes.Compare([]byte(" "), z.Raw()) != 0 {
+		t.Error("Expected text token")
+	}
+	if z.Next() != EndTagToken || bytes.Compare([]byte("</html>"), z.Raw()) != 0 {
+		t.Error("Expected end tag token")
+	}
+	if z.Next() != ErrorToken || z.Err() != io.EOF {
+		t.Error("Expected EOF")
+	}
+}
+
 // zeroOneByteReader is like a strings.Reader that alternates between
 // returning 0 bytes and 1 byte at a time.
 type zeroOneByteReader struct {
