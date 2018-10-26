@@ -278,7 +278,7 @@ func (z *Tokenizer) readByte() byte {
 			z.err = z.readErr
 			return 0
 		}
-		z.offset += d
+		z.offset += n
 		z.buf = buf1[:d+n]
 	}
 	x := z.buf[z.raw.end]
@@ -1196,7 +1196,8 @@ func (z *Tokenizer) SetMaxBuf(n int) {
 
 // Report the start and end offset of the current token
 func (z *Tokenizer) Offset() (int, int) {
-	return z.offset + z.raw.start, z.offset + z.raw.end
+	base := z.offset - len(z.buf)
+	return base + z.raw.start, base + z.raw.end
 }
 
 // NewTokenizer returns a new HTML Tokenizer for the given Reader.
@@ -1234,10 +1235,11 @@ func (e emptyReader) Read(out []byte) (n int, err error) {
 }
 
 // NewTokenizerFromBuffer returns a new HTML tokenizer for the given
-// buffer. This can avoid copying the buffer.
-func NewTokenizerFromBuffer(b []byte) *Tokenizer {
+// buffer. This enables users to avoid the implicit copying of io.Reader
+func NewTokenizerFromBytes(b []byte) *Tokenizer {
 	return &Tokenizer{
-		r:   emptyReader{},
-		buf: b,
+		r:      emptyReader{},
+		buf:    b,
+		offset: len(b),
 	}
 }

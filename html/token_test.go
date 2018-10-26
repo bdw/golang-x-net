@@ -670,6 +670,7 @@ func TestTokenizerFromBuffer(t *testing.T) {
 
 func TestOffset(t *testing.T) {
 	z := NewTokenizer(bytes.NewBufferString("<html><body> foo <br /></body></html>"))
+	z.SetMaxBuf(16)
 	offsets := []int{0, 6, 12, 17, 23, 30, 37}
 	for i := 1; i < len(offsets); i++ {
 		z.Next()
